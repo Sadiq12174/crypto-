@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptography Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-center p-10">
+
+    <h1 class="text-3xl font-bold mb-6">🔐 Cryptography Tool</h1>
+
+    <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+        
+        <!-- Encrypt Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-2">1️⃣ Encrypt</h2>
+            <div class="flex gap-3 justify-center mb-3">
+                <label><input type="radio" name="encryptType" value="text" checked> Text</label>
+                <label><input type="radio" name="encryptType" value="image"> Image</label>
+                <label><input type="radio" name="encryptType" value="audio"> Audio</label>
+                <label><input type="radio" name="encryptType" value="file"> File</label>
+            </div>
+            <input type="file" id="encryptFile" class="block w-full mb-3 border p-2">
+            <input type="text" id="encryptKey" placeholder="Enter Secret Key" class="block w-full mb-3 border p-2">
+            <button onclick="encryptFile()" class="bg-blue-500 text-white py-2 px-4 rounded w-full">Encrypt</button>
+            <p id="encryptOutput" class="mt-3 text-sm text-gray-600"></p>
+        </div>
+
+        <!-- Generate Hash Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-2">1️⃣ Generate Hash</h2>
+            <div class="flex gap-3 justify-center mb-3">
+                <label><input type="radio" name="hashType" value="text" checked> Text</label>
+                <label><input type="radio" name="hashType" value="image"> Image</label>
+                <label><input type="radio" name="hashType" value="audio"> Audio</label>
+                <label><input type="radio" name="hashType" value="file"> File</label>
+            </div>
+            <input type="file" id="hashFile" class="block w-full mb-3 border p-2">
+            <input type="text" id="encryptKey" placeholder="Enter Secret Key" class="block w-full mb-3 border p-2">
+            <button onclick="generateHash()" class="bg-yellow-500 text-white py-2 px-4 rounded w-full">Generate Hash</button>
+            <p id="hashOutput" class="mt-3 text-sm text-gray-600"></p>
+        </div>
+
+        <!-- Encrypt & Hash Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-2">1️⃣ Encrypt & Hash</h2>
+            <div class="flex gap-3 justify-center mb-3">
+                <label><input type="radio" name="hashType" value="text" checked> Text</label>
+                <label><input type="radio" name="hashType" value="image"> Image</label>
+                <label><input type="radio" name="hashType" value="audio"> Audio</label>
+                <label><input type="radio" name="hashType" value="file"> File</label>
+            </div>
+            <input type="file" id="encryptHashFile" class="block w-full mb-3 border p-2">
+            <input type="text" id="encryptHashKey" placeholder="Enter Secret Key" class="block w-full mb-3 border p-2">
+            <button onclick="encryptAndHash()" class="bg-green-500 text-white py-2 px-4 rounded w-full">Encrypt & Hash</button>
+            <p id="encryptHashOutput" class="mt-3 text-sm text-gray-600"></p>
+        </div>
+
+        <!-- Decrypt Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-2">1️⃣ Decrypt</h2>
+            <div class="flex gap-3 justify-center mb-3">
+                <label><input type="radio" name="hashType" value="text" checked> Text</label>
+                <label><input type="radio" name="hashType" value="image"> Image</label>
+                <label><input type="radio" name="hashType" value="audio"> Audio</label>
+                <label><input type="radio" name="hashType" value="file"> File</label>
+            </div>
+            <input type="file" id="decryptFile" class="block w-full mb-3 border p-2">
+            <input type="text" id="decryptKey" placeholder="Enter Secret Key" class="block w-full mb-3 border p-2">
+            <button onclick="decryptFile()" class="bg-red-500 text-white py-2 px-4 rounded w-full">Decrypt</button>
+            <p id="decryptOutput" class="mt-3 text-sm text-gray-600"></p>
+        </div>
+
+    </div>
+
+<script>
+    async function encryptFile() {
+    let file = document.getElementById("encryptFile").files[0];
+    let key = document.getElementById("encryptKey").value;
+
+    if (!file || !key) {
+        alert("⚠️ Please select a file and enter a secret key.");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", file);
+    formData.append("key", key);
+
+    let response = await fetch("/encrypt", { method: "POST", body: formData });
+    let data = await response.json(); // Expecting JSON response
+
+    if (data.success) {
+        document.getElementById("encryptOutput").innerHTML = `🔒 Encrypted Successfully! <br> File saved as: <b>${data.filename}</b>`;
+    } else {
+        alert("❌ Encryption failed.");
+    }
+}
+
+async function generateHash() {
+    let file = document.getElementById("hashFile").files[0];
+
+    if (!file) {
+        alert("⚠️ Please select a file.");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    let response = await fetch("/hash", { method: "POST", body: formData });
+    let data = await response.json();
+
+    if (data.success) {
+        document.getElementById("hashOutput").innerHTML = `🔑 Hash: <b>${data.hash}</b>`;
+    } else {
+        alert("❌ Hash generation failed.");
+    }
+}
+
+async function encryptAndHash() {
+    let file = document.getElementById("encryptHashFile").files[0];
+    let key = document.getElementById("encryptHashKey").value;
+
+    if (!file || !key) {
+        alert("⚠️ Please select a file and enter a secret key.");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", file);
+    formData.append("key", key);
+
+    let response = await fetch("/encrypt-hash", { method: "POST", body: formData });
+    let data = await response.json();
+
+    if (data.success) {
+        document.getElementById("encryptHashOutput").innerHTML = `✅ Encrypted & Hashed Successfully! <br> Hash: <b>${data.hash}</b>`;
+    } else {
+        alert("❌ Encryption & Hash failed.");
+    }
+}
+
+async function decryptFile() {
+    let file = document.getElementById("decryptFile").files[0];
+    let key = document.getElementById("decryptKey").value;
+
+    if (!file || !key) {
+        alert("⚠️ Please select an encrypted file and enter the secret key.");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", file);
+    formData.append("key", key);
+
+    let response = await fetch("/decrypt", { method: "POST", body: formData });
+    let data = await response.json();
+
+    if (data.success) {
+        document.getElementById("decryptOutput").innerHTML = 
+            `🔓 Decryption Successful! <br> File saved as: <b>${data.filename}</b>`;
+    } else {
+        alert("❌ Wrong key entered. Please try again.");
+    }
+}
+
+
+</script>
+</body>
+</html>
